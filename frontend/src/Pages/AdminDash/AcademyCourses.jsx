@@ -13,7 +13,7 @@ import Badge from "@mui/material/Badge";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { mainListItems } from "../../Components/UserDash//ListItems";
+import { mainListItems } from "../../Components/AdminDash/ListItems";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
@@ -22,6 +22,7 @@ import CardContent from "@mui/material/CardContent";
 import Rating from "@mui/material/Rating";
 import { UserContext } from "../../Components/Context/UserContext";
 import axios from "axios";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -72,40 +73,44 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function Course() {
+export default function AcademyCourses() {
   const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate();
   const toggleDrawer = () => {
     setOpen(!open);
   };
   const [courses, setCourses] = React.useState([]);
   const { user } = React.useContext(UserContext);
+  const location = useLocation();
   React.useEffect(() => {
     async function fetch() {
-      const res = await axios.get("http://localhost:8080/api/courses/", {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await axios.get(
+        `http://localhost:8080/api/academies/courses/${location.state.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       console.log(res.data);
       await setCourses(res.data);
     }
     fetch();
   }, []);
-
-  async function apply(courseId) {
-    const res = await axios.post(
-      `http://localhost:8080/api/courses/register/${courseId}`,
-      { id: user.id },
-      {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
+  async function handleDelete(id) {
+    await axios.delete(`http://localhost:8080/api/courses/${id}`, {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+    const res = await axios.get("http://localhost:8080/api/courses/", {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
     console.log(res.data);
-    alert("Successfully applied for course");
+    await setCourses(res.data);
   }
-
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -135,7 +140,7 @@ export default function Course() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              User Dashboard
+              Admin Dashboard
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
@@ -179,7 +184,9 @@ export default function Course() {
           <br />
           <br />
           <br />
-          <h1 style={{ padding: "0 20px" }}>Browse Courses</h1>
+          <h1 style={{ padding: "0 20px" }}>
+            Courses in {location.state.name}
+          </h1>
           <Container
             style={{
               display: "flex",
@@ -233,16 +240,44 @@ export default function Course() {
                     <br />
                     <Button
                       onClick={() => {
-                        apply(course.id);
+                        navigate("/dashboard/admin/courses/users", {
+                          state: {
+                            id: course.id,
+                          },
+                        });
                       }}
                       variant="contained"
                       color="primary"
                       size="small"
                       style={{ marginTop: 10 }}
                     >
-                      Apply for course
+                      View Users
                     </Button>
                     <br />
+                    <Link
+                      to={"/dashboard/admin/course/edit"}
+                      state={{ course: course }}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        style={{ marginTop: 10 }}
+                      >
+                        Edit
+                      </Button>
+                    </Link>{" "}
+                    <Button
+                      onClick={() => {
+                        handleDelete(course.id);
+                      }}
+                      variant="contained"
+                      color="error"
+                      size="small"
+                      style={{ marginTop: 10 }}
+                    >
+                      Delete
+                    </Button>
                   </CardContent>
                 </Card>
               ))}

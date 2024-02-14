@@ -91,7 +91,7 @@ public class CourseController {
         return courseService.registerCourse(user.getId(), id);
     }
 
-    @DeleteMapping("/withdraw/{id}")
+    @PostMapping("/withdraw/{id}")
     public ResponseEntity<String> withdrawCourse(@PathVariable Long id, @RequestBody User user) {
         return courseService.withdrawCourse(user.getId(), id);
     }

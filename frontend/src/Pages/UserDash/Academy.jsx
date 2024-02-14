@@ -13,14 +13,16 @@ import Badge from "@mui/material/Badge";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { mainListItems } from "../../Components/UserDash/ListItems";
+import { mainListItems } from "../../Components/UserDash//ListItems";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import { yogaAcademiesData } from "../../Components/data";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import Rating from "@mui/material/Rating";
+import axios from "axios";
+import { UserContext } from "../../Components/Context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -72,6 +74,22 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 export default function Academy() {
+  const [academies, setAcademies] = React.useState([]);
+  const { user } = React.useContext(UserContext);
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await axios.get("http://localhost:8080/api/academies/", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(res.data);
+      await setAcademies(res.data);
+    }
+    fetch();
+  }, []);
+
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -84,7 +102,7 @@ export default function Academy() {
         <AppBar position="absolute" open={open}>
           <Toolbar
             sx={{
-              pr: "24px", // keep right padding when drawer closed
+              pr: "24px", // keep right padding when drawer clos`ed
             }}
           >
             <IconButton
@@ -106,7 +124,7 @@ export default function Academy() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              User Dashboard
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
@@ -150,7 +168,7 @@ export default function Academy() {
           <br />
           <br />
           <br />
-          <h1 style={{ padding: "0 20px" }}>Browse Academies</h1>
+          <h1 style={{ padding: "0 20px" }}>Academies</h1>
           <Container
             style={{
               display: "flex",
@@ -161,44 +179,70 @@ export default function Academy() {
             maxWidth="lg"
             sx={{ mt: 4, mb: 4 }}
           >
-            {yogaAcademiesData.map((academy) => (
-              <Card style={{ width: 300, margin: 10 }} key={academy.id}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={academy.imageURL}
-                  alt={academy.name}
-                />
-                <CardContent>
-                  <Typography variant="h6" component="div" gutterBottom>
-                    {academy.name}
-                  </Typography>
-                  <Typography
-                    variant="subtitle2"
-                    color="textSecondary"
-                    paragraph
-                  >
-                    {academy.location}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    Instructors: {academy.instructors.join(", ")}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    {academy.description}
-                  </Typography>
-                  <Rating name="read-only" value={academy.rating} readOnly />
-                  <br />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    style={{ marginTop: 10 }}
-                  >
-                    Browse Courses
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {academies &&
+              academies.map((academy) => (
+                <Card style={{ width: 300, margin: 10 }} key={academy.id}>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={academy.imgURL}
+                    alt={academy.name}
+                  />
+                  <CardContent>
+                    <Typography variant="h6" component="div" gutterBottom>
+                      {academy.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" paragraph>
+                      {academy.description}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.city}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.state}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.country}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      paragraph
+                    ></Typography>
+                    <Rating name="read-only" value={academy.ratings} readOnly />
+                    <br />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      style={{ marginTop: 10 }}
+                      onClick={() => {
+                        navigate("/dashboard/user/academy/courses", {
+                          state: {
+                            id: academy.id,
+                            name: academy.name,
+                          },
+                        });
+                      }}
+                    >
+                      View Courses
+                    </Button>
+                    <br />
+                  </CardContent>
+                </Card>
+              ))}
           </Container>
         </Box>
       </Box>

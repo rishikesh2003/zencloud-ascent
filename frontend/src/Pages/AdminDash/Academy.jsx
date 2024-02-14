@@ -16,11 +16,14 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../Components/AdminDash/ListItems";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import { yogaAcademiesData } from "../../Components/data";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import Rating from "@mui/material/Rating";
+import axios from "axios";
+import { UserContext } from "../../Components/Context/UserContext";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -72,6 +75,37 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 export default function Academy() {
+  const [academies, setAcademies] = React.useState([]);
+  const { user } = React.useContext(UserContext);
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await axios.get("http://localhost:8080/api/academies/", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(res.data);
+      await setAcademies(res.data);
+    }
+    fetch();
+  }, []);
+
+  async function handleDelete(academyId) {
+    await axios.delete(`http://localhost:8080/api/academies/${academyId}`, {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+    const res = await axios.get("http://localhost:8080/api/academies/", {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+    console.log(res.data);
+    await setAcademies(res.data);
+  }
+
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -161,44 +195,94 @@ export default function Academy() {
             maxWidth="lg"
             sx={{ mt: 4, mb: 4 }}
           >
-            {yogaAcademiesData.map((academy) => (
-              <Card style={{ width: 300, margin: 10 }} key={academy.id}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={academy.imageURL}
-                  alt={academy.name}
-                />
-                <CardContent>
-                  <Typography variant="h6" component="div" gutterBottom>
-                    {academy.name}
-                  </Typography>
-                  <Typography
-                    variant="subtitle2"
-                    color="textSecondary"
-                    paragraph
-                  >
-                    {academy.location}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    Instructors: {academy.instructors.join(", ")}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    {academy.description}
-                  </Typography>
-                  <Rating name="read-only" value={academy.rating} readOnly />
-                  <br />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    style={{ marginTop: 10 }}
-                  >
-                    Edit
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {academies &&
+              academies.map((academy) => (
+                <Card style={{ width: 300, margin: 10 }} key={academy.id}>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={academy.imgURL}
+                    alt={academy.name}
+                  />
+                  <CardContent>
+                    <Typography variant="h6" component="div" gutterBottom>
+                      {academy.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" paragraph>
+                      {academy.description}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.city}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.state}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
+                      paragraph
+                    >
+                      {academy.country}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      paragraph
+                    ></Typography>
+                    <Rating name="read-only" value={academy.ratings} readOnly />
+                    <br />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      style={{ marginTop: 10 }}
+                      onClick={() => {
+                        navigate("/dashboard/admin/academy/courses", {
+                          state: {
+                            id: academy.id,
+                            name: academy.name,
+                          },
+                        });
+                      }}
+                    >
+                      View Courses
+                    </Button>
+                    <br />
+                    <Link
+                      to={"/dashboard/admin/academy/edit"}
+                      state={{ academy: academy }}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        style={{ marginTop: 10 }}
+                      >
+                        Edit
+                      </Button>
+                    </Link>{" "}
+                    <Button
+                      onClick={() => {
+                        handleDelete(academy.id);
+                      }}
+                      variant="contained"
+                      color="error"
+                      size="small"
+                      style={{ marginTop: 10 }}
+                    >
+                      Delete
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
           </Container>
         </Box>
       </Box>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { HiOutlineBars3 } from "react-icons/hi2";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -11,11 +11,48 @@ import HomeIcon from "@mui/icons-material/Home";
 import InfoIcon from "@mui/icons-material/Info";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { Link } from "react-router-dom";
+import { UserContext } from "./Context/UserContext";
 
 const Navbar = ({ secondary }) => {
   const [openMenu, setOpenMenu] = useState(false);
+  const { user } = useContext(UserContext);
+
+  const dynamicMenu = user
+    ? [
+        user.role == "USER"
+          ? {
+              text: "Dashboard",
+              icon: <DashboardIcon />,
+              link: "/dashboard/user",
+            }
+          : {
+              text: "Dashboard",
+              icon: <DashboardIcon />,
+              link: "/dashboard/admin",
+            },
+        {
+          text: "Logout",
+          icon: <LogoutIcon />,
+          link: "/logout",
+        },
+      ]
+    : [
+        {
+          text: "Sign In",
+          icon: <AssignmentIndIcon />,
+          link: "/signin",
+        },
+        {
+          text: "Sign Up",
+          icon: <HowToRegIcon />,
+          link: "/signup",
+        },
+      ];
   const menuOptions = [
     {
       text: "Home",
@@ -32,16 +69,7 @@ const Navbar = ({ secondary }) => {
       icon: <PhoneRoundedIcon />,
       link: "/contact",
     },
-    {
-      text: "Sign In",
-      icon: <AssignmentIndIcon />,
-      link: "/signin",
-    },
-    {
-      text: "Sign Up",
-      icon: <HowToRegIcon />,
-      link: "/signup",
-    },
+    ...dynamicMenu,
   ];
   return (
     <nav>
@@ -53,20 +81,61 @@ const Navbar = ({ secondary }) => {
         <Link to="/about">About</Link>
         <Link to="/contact">Contact</Link>
 
-        <Link to={"/signin"}>
-          <button
-            className={secondary ? "secondary-button-nav" : "primary-button"}
-          >
-            Sign In
-          </button>
-        </Link>
-        <Link to={"/signup"}>
-          <button
-            className={secondary ? "secondary-button-nav" : "primary-button"}
-          >
-            Sign Up
-          </button>
-        </Link>
+        {user ? (
+          <>
+            {user.role == "USER" ? (
+              <Link to={"/dashboard/user"}>
+                <button
+                  className={
+                    secondary ? "secondary-button-nav" : "primary-button"
+                  }
+                >
+                  Dashboard
+                </button>
+              </Link>
+            ) : (
+              <Link to={"/dashboard/admin"}>
+                <button
+                  className={
+                    secondary ? "secondary-button-nav" : "primary-button"
+                  }
+                >
+                  Dashboard
+                </button>
+              </Link>
+            )}
+            <Link to={"/logout"}>
+              <button
+                className={
+                  secondary ? "secondary-button-nav" : "primary-button"
+                }
+              >
+                Logout
+              </button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to={"/signin"}>
+              <button
+                className={
+                  secondary ? "secondary-button-nav" : "primary-button"
+                }
+              >
+                Sign In
+              </button>
+            </Link>
+            <Link to={"/signup"}>
+              <button
+                className={
+                  secondary ? "secondary-button-nav" : "primary-button"
+                }
+              >
+                Sign Up
+              </button>
+            </Link>
+          </>
+        )}
       </div>
       <div className="navbar-menu-container">
         <HiOutlineBars3 onClick={() => setOpenMenu(true)} />

@@ -10,21 +10,35 @@ import Grid from "@mui/material/Grid";
 import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { UserContext } from "../Components/Context/UserContext";
 
 const defaultTheme = createTheme();
 
 export default function SignIn() {
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (email === "admin@zencloud.com") {
-      navigate("/dashboard/admin");
-    } else {
-      navigate("/dashboard/user");
+    const data = { email, password };
+    const res = await axios.post(
+      "http://localhost:8080/api/v1/auth/authenticate",
+      data
+    );
+    const user = await res.data.user;
+    const token = await res.data.token;
+    user.token = token;
+    await setUser(user);
+    console.log(user);
+    const role = await res.data.user.role;
+    if (role == "USER") {
+      await navigate("/dashboard/user");
+    } else if (role == "ADMIN") {
+      await navigate("/dashboard/admin");
     }
   }
   return (

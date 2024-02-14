@@ -43,7 +43,7 @@ export const mainListItems = (
         <ListItemText primary="Profile" />
       </ListItemButton>
     </Link>
-    <Link className="mobile-links" to={"/signin"}>
+    <Link className="mobile-links" to={"/logout"}>
       <ListItemButton>
         <ListItemIcon>
           <LogoutIcon />

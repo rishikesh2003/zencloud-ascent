@@ -19,6 +19,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import axios from "axios";
 import { UserContext } from "../../Components/Context/UserContext";
+import { useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -69,30 +70,34 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function CreateAcademy() {
+export default function CourseEdit() {
+  const [academies, setAcademies] = React.useState([]);
+  const { user } = React.useContext(UserContext);
+  const location = useLocation();
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await axios.get("http://localhost:8080/api/academies/", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(res.data);
+      await setAcademies(res.data);
+      console.log(res.data);
+    }
+    fetch();
+  }, []);
+  const [course, setCourse] = React.useState(location.state.course);
   const [open, setOpen] = React.useState(true);
-  const [academy, setAcademy] = React.useState({
-    name: "",
-    city: "",
-    country: "",
-    state: "",
-    description: "",
-    ratings: 0,
-    imgURL: "",
-  });
   const toggleDrawer = () => {
     setOpen(!open);
   };
-  const { user } = React.useContext(UserContext);
-
   async function handleSubmit(e) {
     e.preventDefault();
-    console.log({
-      Authorization: `Bearer ${user.token}`,
-    });
-    const res = await axios.post(
-      "http://localhost:8080/api/academies/",
-      academy,
+    console.log(course);
+    const res = await axios.put(
+      `http://localhost:8080/api/courses/${course.id}`,
+      course,
       {
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -100,7 +105,7 @@ export default function CreateAcademy() {
       }
     );
     await console.log(res);
-    await alert("Academy added");
+    await alert("Course Updated");
   }
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -186,118 +191,198 @@ export default function CreateAcademy() {
                 }}
               >
                 <Typography component="h1" variant="h5">
-                  Create Academy
+                  Edit Course
                 </Typography>
-                <br />
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                  <label>Academy Name*</label>
+                  <label>Course Name*</label>
                   <TextField
-                    margin="normal"
-                    required
-                    value={academy.name}
+                    value={course.name}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         name: e.target.value,
                       }));
                     }}
+                    margin="normal"
+                    required
                     fullWidth
-                    id="name"
-                    name="name"
-                    autoComplete="name"
                     autoFocus
                   />
-                  <label>Academy Description*</label>
+                  <label>Course Description*</label>
                   <textarea
-                    className="textfield-contact"
-                    required
-                    value={academy.description}
+                    value={course.description}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         description: e.target.value,
                       }));
                     }}
-                    name="description"
+                    className="textfield-contact"
+                    required
                     autoFocus
                   />
                   <label>Image URL*</label>
                   <TextField
-                    margin="normal"
-                    value={academy.imgURL}
+                    value={course.imgURL}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         imgURL: e.target.value,
                       }));
                     }}
+                    margin="normal"
                     required
                     fullWidth
-                    name="image"
+                    autoFocus
+                  />
+                  <label>Academy*</label>
+                  <br />
+                  <select
+                    value={course.academy.id}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        academy: {
+                          id: e.target.value,
+                        },
+                      }));
+                    }}
+                    style={{ width: "100%", padding: "10px" }}
+                  >
+                    {academies &&
+                      academies.map((academy) => (
+                        <option key={academy.id} value={academy.id}>
+                          {academy.name}
+                        </option>
+                      ))}
+                  </select>
+                  <br />
+                  <br />
+                  <label>Time*</label>
+                  <TextField
+                    value={course.time}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        time: e.target.value,
+                      }));
+                    }}
+                    margin="normal"
+                    required
+                    fullWidth
+                    autoFocus
+                  />
+                  <label>Date*</label>
+                  <TextField
+                    value={course.date}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        date: e.target.value,
+                      }));
+                    }}
+                    margin="normal"
+                    required
+                    fullWidth
+                    autoFocus
+                  />
+                  <label>Course Fee*</label>
+                  <TextField
+                    value={course.courseFee}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        courseFee: e.target.value,
+                      }));
+                    }}
+                    margin="normal"
+                    required
+                    fullWidth
                     autoFocus
                   />
                   <label>Ratings*</label>
                   <TextField
-                    margin="normal"
-                    value={academy.ratings}
+                    value={course.rating}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
-                        ratings: Number(e.target.value),
+                      setCourse((course) => ({
+                        ...course,
+                        rating: Number(e.target.value),
                       }));
                     }}
+                    margin="normal"
                     required
                     fullWidth
-                    name="ratings"
-                    type="number"
+                    autoFocus
+                  />
+                  <label>Instructor*</label>
+                  <TextField
+                    value={course.instructor}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        instructor: e.target.value,
+                      }));
+                    }}
+                    margin="normal"
+                    required
+                    fullWidth
+                    autoFocus
+                  />
+                  <label>Address</label>
+                  <textarea
+                    value={course.address}
+                    onChange={(e) => {
+                      setCourse((course) => ({
+                        ...course,
+                        address: e.target.value,
+                      }));
+                    }}
+                    className="textfield-contact"
+                    required
                     autoFocus
                   />
                   <label>City*</label>
                   <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="city"
-                    value={academy.city}
+                    value={course.city}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         city: e.target.value,
                       }));
                     }}
+                    margin="normal"
+                    required
+                    fullWidth
                     autoFocus
                   />
                   <label>State*</label>
                   <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="state"
-                    value={academy.state}
+                    value={course.state}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         state: e.target.value,
                       }));
                     }}
+                    margin="normal"
+                    required
+                    fullWidth
                     autoFocus
                   />
                   <label>Country*</label>
                   <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="country"
-                    value={academy.country}
+                    value={course.country}
                     onChange={(e) => {
-                      setAcademy((acad) => ({
-                        ...acad,
+                      setCourse((course) => ({
+                        ...course,
                         country: e.target.value,
                       }));
                     }}
+                    margin="normal"
+                    required
+                    fullWidth
                     autoFocus
                   />
-
                   <div>
                     <Button
                       type="submit"
@@ -305,12 +390,12 @@ export default function CreateAcademy() {
                       variant="contained"
                       sx={{ mt: 3, mb: 2 }}
                     >
-                      Create Academy
+                      Edit Course
                     </Button>
                   </div>
                 </Box>
               </Box>
-            </Container>
+            </Container>{" "}
           </Container>
         </Box>
       </Box>

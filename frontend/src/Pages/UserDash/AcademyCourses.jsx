@@ -22,6 +22,7 @@ import CardContent from "@mui/material/CardContent";
 import Rating from "@mui/material/Rating";
 import { UserContext } from "../../Components/Context/UserContext";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -72,39 +73,30 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function Course() {
+export default function AcademyCourses() {
   const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate();
   const toggleDrawer = () => {
     setOpen(!open);
   };
   const [courses, setCourses] = React.useState([]);
   const { user } = React.useContext(UserContext);
+  const location = useLocation();
   React.useEffect(() => {
     async function fetch() {
-      const res = await axios.get("http://localhost:8080/api/courses/", {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await axios.get(
+        `http://localhost:8080/api/academies/courses/${location.state.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       console.log(res.data);
       await setCourses(res.data);
     }
     fetch();
   }, []);
-
-  async function apply(courseId) {
-    const res = await axios.post(
-      `http://localhost:8080/api/courses/register/${courseId}`,
-      { id: user.id },
-      {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
-    console.log(res.data);
-    alert("Successfully applied for course");
-  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -179,7 +171,9 @@ export default function Course() {
           <br />
           <br />
           <br />
-          <h1 style={{ padding: "0 20px" }}>Browse Courses</h1>
+          <h1 style={{ padding: "0 20px" }}>
+            Courses in {location.state.name}
+          </h1>
           <Container
             style={{
               display: "flex",
@@ -233,7 +227,11 @@ export default function Course() {
                     <br />
                     <Button
                       onClick={() => {
-                        apply(course.id);
+                        navigate("/dashboard/admin/courses/users", {
+                          state: {
+                            id: course.id,
+                          },
+                        });
                       }}
                       variant="contained"
                       color="primary"

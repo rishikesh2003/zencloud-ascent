@@ -16,8 +16,9 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../Components/AdminDash/ListItems";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
-import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
+import axios from "axios";
+import { UserContext } from "../../Components/Context/UserContext";
 import { useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -69,15 +70,33 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function UsersAdminEdit() {
+export default function EditAcademy() {
+  const [open, setOpen] = React.useState(true);
   const location = useLocation();
 
-  const [open, setOpen] = React.useState(true);
+  const [academy, setAcademy] = React.useState(location.state.academy);
   const toggleDrawer = () => {
     setOpen(!open);
   };
-  function handleSubmit(e) {
+  const { user } = React.useContext(UserContext);
+
+  async function handleSubmit(e) {
     e.preventDefault();
+    console.log({
+      Authorization: `Bearer ${user.token}`,
+    });
+    console.log(academy, academy.id);
+    const res = await axios.put(
+      `http://localhost:8080/api/academies/${academy.id}`,
+      academy,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+    await console.log(res);
+    await alert("Academy Updated");
   }
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -163,45 +182,115 @@ export default function UsersAdminEdit() {
                 }}
               >
                 <Typography component="h1" variant="h5">
-                  Edit User
+                  Edit Academy
                 </Typography>
-                <Box
-                  component="form"
-                  onSubmit={handleSubmit}
-                  noValidate
-                  sx={{ mt: 1 }}
-                >
-                  <label>Name*</label>
+                <br />
+                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                  <label>Academy Name*</label>
                   <TextField
                     margin="normal"
-                    value={location.state.user.name}
                     required
+                    value={academy.name}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        name: e.target.value,
+                      }));
+                    }}
                     fullWidth
                     id="name"
                     name="name"
                     autoComplete="name"
                     autoFocus
                   />
-                  <label>Email*</label>
-                  <TextField
-                    margin="normal"
+                  <label>Academy Description*</label>
+                  <textarea
+                    className="textfield-contact"
                     required
-                    value={location.state.user.email}
-                    fullWidth
-                    id="email"
-                    name="email"
-                    autoComplete="email"
+                    value={academy.description}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        description: e.target.value,
+                      }));
+                    }}
+                    name="description"
                     autoFocus
                   />
-                  <label>Mobile Number*</label>
+                  <label>Image URL*</label>
+                  <TextField
+                    margin="normal"
+                    value={academy.imgURL}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        imgURL: e.target.value,
+                      }));
+                    }}
+                    required
+                    fullWidth
+                    name="image"
+                    autoFocus
+                  />
+                  <label>Ratings*</label>
+                  <TextField
+                    margin="normal"
+                    value={academy.ratings}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        ratings: Number(e.target.value),
+                      }));
+                    }}
+                    required
+                    fullWidth
+                    name="ratings"
+                    type="number"
+                    autoFocus
+                  />
+                  <label>City*</label>
                   <TextField
                     margin="normal"
                     required
-                    value={location.state.user.phone}
                     fullWidth
-                    id="phone"
-                    name="phone-number"
-                    autoComplete="phone"
+                    name="city"
+                    value={academy.city}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        city: e.target.value,
+                      }));
+                    }}
+                    autoFocus
+                  />
+                  <label>State*</label>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="state"
+                    value={academy.state}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        state: e.target.value,
+                      }));
+                    }}
+                    autoFocus
+                  />
+                  <label>Country*</label>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="country"
+                    value={academy.country}
+                    onChange={(e) => {
+                      setAcademy((acad) => ({
+                        ...acad,
+                        country: e.target.value,
+                      }));
+                    }}
                     autoFocus
                   />
 
@@ -212,22 +301,12 @@ export default function UsersAdminEdit() {
                       variant="contained"
                       sx={{ mt: 3, mb: 2 }}
                     >
-                      Edit
+                      Edit Academy
                     </Button>
-                    <Link to={"/dashboard/admin/users"}>
-                      <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                      >
-                        Back
-                      </Button>
-                    </Link>
                   </div>
                 </Box>
               </Box>
-            </Container>{" "}
+            </Container>
           </Container>
         </Box>
       </Box>

@@ -22,8 +22,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { UserContext } from "../../Components/Context/UserContext";
 
 const drawerWidth = 240;
 
@@ -75,6 +75,25 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 export default function UsersAdmin() {
+  const [rows, setRows] = React.useState([]);
+  const { user } = React.useContext(UserContext);
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await axios.get("http://localhost:8080/api/users/", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const users = await res.data;
+      const rows =
+        users &&
+        users.map((user) =>
+          createData(user.name, user.email, user.phone, user.password)
+        );
+      setRows(rows);
+    }
+    fetch();
+  });
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -82,34 +101,6 @@ export default function UsersAdmin() {
   function createData(name, email, phone, pass) {
     return { name, email, phone, pass };
   }
-
-  const rows = [
-    createData(
-      "Sai Sathyan V R",
-      "saisathyan@gmail.com",
-      "9876453623",
-      "xxxxxxxxx"
-    ),
-    createData("Sachin G K", "sachin@gmail.com", "5876453623", "xxxxxxxxx"),
-    createData(
-      "Ramkarthik G",
-      "ramkarthik@gmail.com",
-      "8876453623",
-      "xxxxxxxxx"
-    ),
-    createData(
-      "Sanjivnaath P",
-      "sanjivnaath@gmail.com",
-      "7876453623",
-      "xxxxxxxxx"
-    ),
-    createData(
-      "Vijaya Kumar M P",
-      "vijayakumar@gmail.com",
-      "6876453623",
-      "xxxxxxxxx"
-    ),
-  ];
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -196,8 +187,6 @@ export default function UsersAdmin() {
                       <TableCell align="right">Email</TableCell>
                       <TableCell align="right">Mobile Number</TableCell>
                       <TableCell align="right">Password</TableCell>
-                      <TableCell align="right">Edit</TableCell>
-                      <TableCell align="right">Delete</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -214,19 +203,6 @@ export default function UsersAdmin() {
                         <TableCell align="right">{row.email}</TableCell>
                         <TableCell align="right">{row.phone}</TableCell>
                         <TableCell align="right">{row.pass}</TableCell>
-                        <TableCell align="right">
-                          <Link
-                            state={{ user: row }}
-                            to={"/dashboard/admin/users/edit"}
-                          >
-                            <Button variant="contained">Edit</Button>
-                          </Link>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Button color="error" variant="contained">
-                            Delete
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

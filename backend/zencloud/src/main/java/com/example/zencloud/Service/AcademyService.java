@@ -40,6 +40,7 @@ public class AcademyService {
             existingAcademy.setCountry(updatedAcademy.getCountry());
             existingAcademy.setState(updatedAcademy.getState());
             existingAcademy.setRatings(updatedAcademy.getRatings());
+            existingAcademy.setDescription(updatedAcademy.getDescription());
 
             academyRepository.save(existingAcademy);
             return ResponseEntity.ok().body("Academy Updated");

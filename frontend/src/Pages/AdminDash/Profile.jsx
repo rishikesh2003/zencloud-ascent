@@ -14,10 +14,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../Components/AdminDash/ListItems";
-import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Avatar from "@mui/material/Avatar";
+import { UserContext } from "../../Components/Context/UserContext";
 
 const drawerWidth = 240;
 
@@ -73,7 +73,7 @@ export default function Profile() {
   const toggleDrawer = () => {
     setOpen(!open);
   };
-
+  const { user } = React.useContext(UserContext);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -177,29 +177,20 @@ export default function Profile() {
               </Typography>
               {/* Add your profile form fields here */}
               <Typography component={"h1"} variant="h6">
-                <strong>Name: </strong>Admin
+                <strong>Name: </strong>
+                {user.name}
               </Typography>
               <br />
               <Typography component={"h1"} variant="h6">
-                <strong>Email: </strong>admin@zencloud.com
+                <strong>Email: </strong>
+                {user.email}
               </Typography>
               <br />
               <Typography component={"h1"} variant="h6">
-                <strong>Phone: </strong>9973728193
+                <strong>Phone: </strong>
+                {user.phone}
               </Typography>
               <br />
-              <Typography component={"h1"} variant="h6">
-                <strong>Password: </strong>********
-              </Typography>
-              <br />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-              >
-                Edit
-              </Button>
             </Paper>
           </Container>
         </Box>
