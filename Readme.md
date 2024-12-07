@@ -1,6 +1,11 @@
+# SKCET Main Project 
+This app is built for my college project review
+
 **Name :** Rishikesh S
 
 **Email :** rkesh2003@gmail.com
+
+
 
 **Project Name :** ZenCloud Ascent
 **Project Description :** ZenCloud Ascent: Transformative Yoga Academy Admissions with Java Full Stack on AWS
